@@ -1,6 +1,6 @@
 # register-account-flow workflow
 
-Declarative workflow for account registration, auth/token capture, and optional email verification.
+Declarative workflow for account registration: open a registration page, fill standard fields, submit the form, extract auth findings, and optionally coordinate email verification through shared tab context.
 
 ## Entry File
 
@@ -12,17 +12,17 @@ Declarative workflow for account registration, auth/token capture, and optional 
 
 ## Structure
 
-This workflow mirrors the built-in `register_account_flow` handler with declarative nodes:
+This workflow mirrors the built-in `handleRegisterAccountFlow` logic as a declarative graph:
 
-- `network_enable` for request/error capture
+- `network_enable` before navigation for request/error capture
 - `page_navigate` to the registration page
-- `page_type` steps for `username` / `email` / `password`
+- `page_type` steps for `username`, `email`, and `password`
 - Optional checkbox activation via `page_evaluate`
-- `page_click` for form submission
-- Promise-based wait via `page_evaluate`
-- `network_extract_auth` for token discovery
-- Optional email verification using `tab_workflow`
-- `console_execute` summary output
+- `page_click` to submit the form
+- `page_evaluate` delay step to allow registration requests to settle
+- `network_extract_auth` to collect token/auth findings
+- Optional `tab_workflow` branch to open an email tab and transfer the verification URL into shared context
+- `console_execute` summary step for downstream automation
 
 ## Tools Used
 
@@ -50,13 +50,15 @@ This workflow mirrors the built-in `register_account_flow` handler with declarat
 
 ## Notes
 
-- The workflow retrieves the verification link into shared tab context via `tab_workflow`.
-- A follow-up runner can read `__verificationLink` and decide whether to navigate or hand it to a downstream step.
-- If `emailProviderUrl` is empty, the email verification branch is skipped.
+- The email-verification branch stores the discovered URL under shared key `__verificationLink`.
+- A downstream runner can read that context value and decide whether to navigate, verify, or hand off to another workflow.
+- If `emailProviderUrl` is empty, the verification branch is skipped.
 
 ## Local Validation
 
-1. Put this repo under a configured `workflows/` extension root.
-2. Run `extensions_reload` in `jshookmcp`.
-3. Confirm the workflow appears in `extensions_list`.
-4. Trigger the workflow from your workflow runner and verify registration, auth extraction, and optional verification steps.
+1. Run `pnpm install`.
+2. Run `pnpm typecheck`.
+3. Put this repo under a configured `workflows/` extension root.
+4. Run `extensions_reload` in `jshookmcp`.
+5. Confirm the workflow appears in `extensions_list`.
+6. Execute the workflow and verify registration, auth extraction, and optional verification-link transfer.
