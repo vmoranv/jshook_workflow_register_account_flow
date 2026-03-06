@@ -1,0 +1,4 @@
+name: register-account-flow
+description: Declarative workflow for account registration, token capture, and optional email verification.
+author: vmoranv
+source_repo: https://github.com/vmoranv/jshook_workflow_register_account_flow
